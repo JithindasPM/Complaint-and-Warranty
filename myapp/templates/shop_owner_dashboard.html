@@ -1,0 +1,127 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Owner Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .img-container {
+            position: relative;
+            display: inline-block;
+        }
+        .img-container img {
+            width: 200px;
+            transition: transform 0.3s ease;
+        }
+        .img-container img:hover {
+            transform: scale(1.5);
+        }
+        a.back-button {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 5px 10px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Shop Owner Dashboard</h2>
+        
+        <h3>Complaints</h3>
+        {% for complaint in complaints %}
+            <div class="card">
+                <p><strong>Description:</strong> {{ complaint.issue_description }}</p>
+                
+                {% if complaint.product_image %}
+                    <div class="img-container">
+                        <img src="{{ complaint.product_image.url }}" alt="Product Image">
+                    </div>
+                {% endif %}
+                
+                {% if complaint.purchase_receipt %}
+                    <p><strong>Purchase Receipt:</strong> 
+                        <a href="{{ complaint.purchase_receipt.url }}" target="_blank">View Receipt</a>
+                    </p>
+                    <a href="#" class="back-button" onclick="window.history.back();">Go Back</a>
+                {% endif %}
+                
+                <p><strong>Status:</strong> {{ complaint.status }}</p>
+                
+                <form method="post" action="{% url 'update_complaint_status' complaint.pk %}">
+                    {% csrf_token %}
+                    <label for="status">Update Status:</label>
+                    <select name="status">
+                        <option value="in_progress" {% if complaint.status == "in_progress" %}selected{% endif %}>In Progress</option>
+                        <option value="resolved" {% if complaint.status == "resolved" %}selected{% endif %}>Resolved</option>
+                        <option value="rejected" {% if complaint.status == "rejected" %}selected{% endif %}>Rejected</option>
+                    </select>
+                    <button type="submit">Update Status</button>
+                </form>
+            </div>
+        {% empty %}
+            <p>No complaints submitted.</p>
+        {% endfor %}
+
+        <h3>Warranty Claims</h3>
+        {% for claim in warranty_claims %}
+            <div class="card">
+                <p><strong>Description:</strong> {{ claim.claim_description }}</p>
+                
+                {% if claim.product_image %}
+                    <div class="img-container">
+                        <img src="{{ claim.product_image.url }}" alt="Product Image">
+                    </div>
+                {% endif %}
+                
+                {% if claim.purchase_receipt %}
+                    <p><strong>Purchase Receipt:</strong> 
+                        <a href="{{ claim.purchase_receipt.url }}" target="_blank">View Receipt</a>
+                    </p>
+                    <a href="#" class="back-button" onclick="window.history.back();">Go Back</a>
+                {% endif %}
+                
+                <p><strong>Status:</strong> {{ claim.claim_status }}</p>
+                
+                <form method="post" action="{% url 'update_warranty_claim_status' claim.pk %}">
+                    {% csrf_token %}
+                    <label for="claim_status">Update Status:</label>
+                    <select name="claim_status">
+                        <option value="under_review" {% if claim.claim_status == "under_review" %}selected{% endif %}>Under Review</option>
+                        <option value="approved" {% if claim.claim_status == "approved" %}selected{% endif %}>Approved</option>
+                        <option value="denied" {% if claim.claim_status == "denied" %}selected{% endif %}>Denied</option>
+                    </select>
+                    <button type="submit">Update Status</button>
+                </form>
+            </div>
+        {% empty %}
+            <p>No warranty claims submitted.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>
