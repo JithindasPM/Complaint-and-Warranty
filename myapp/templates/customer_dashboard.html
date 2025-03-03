@@ -71,13 +71,18 @@
         font-size: 16px;
     }
 
-    h2, h3, h5 {
+    h3, h5 {
         color: black !important;
+    }
+    .heading{
+        color: white;
+        padding-top: 100px;
+        padding-bottom: 50px;
     }
 </style>
 
 
-<h2 class="text-center my-4">Welcome, {{ request.user.first_name|default:request.user.username }}!</h2>
+<h2 class="text-center my-4 heading">Welcome, {{ request.user.first_name|default:request.user.username }}!</h2>
 
 <div class="container d-flex justify-content-center">
     <div class="row">
@@ -105,35 +110,5 @@
     </div>
 </div>
 
-<div class="container">
-    {% if complaints %}
-        <h3 class="text-center my-4">Your Complaints</h3>
-        {% for complaint in complaints %}
-            <div class="card mb-3">
-                <div class="card-body">
-                    <p><i class="fas fa-exclamation-circle"></i> {{ complaint.issue_description }} - <strong>Status:</strong> {{ complaint.status }}</p>
-                </div>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p class="text-center text-muted">No complaints submitted yet.</p>
-    {% endif %}
-</div>
-
-
-<div class="container">
-    {% if warranty_claims %}
-        <h3 class="text-center my-4">Your Warranty Claims</h3>
-        {% for claim in warranty_claims %}
-            <div class="card mb-3">
-                <div class="card-body">
-                    <p><i class="fas fa-wrench"></i> {{ claim.claim_description }} - <strong>Status:</strong> {{ claim.claim_status }}</p>
-                </div>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p class="text-center text-muted">No warranty claims submitted yet.</p>
-    {% endif %}
-</div>
 
 {% endblock %}

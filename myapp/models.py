@@ -9,16 +9,12 @@ class User(AbstractUser):
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='customer')
 
-
-
     def save(self, *args, **kwargs):
         # Automatically approve superusers as shop owners
         if self.is_superuser:
             self.role = 'shop_owner'
             self.is_approved = True  # Superuser should always be approved
         super().save(*args, **kwargs)
-
-
 
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -40,8 +36,6 @@ class Complaint(models.Model):
 
     def __str__(self):
         return f'Complaint by {self.user.username} on {self.created_at}'
-
-
 
 
 class WarrantyClaim(models.Model):
