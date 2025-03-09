@@ -20,8 +20,17 @@
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
               <li class="nav-item">
-                <a class="nav-link active text-white" aria-current="page" href="/">Home</a>
+                {% if request.user.is_superuser %}
+                    <a class="nav-link active text-white" aria-current="page" href="{% url 'shop_owner_dashboard' %}">Home</a>
+                {% else %}
+                    <a class="nav-link active text-white" aria-current="page" href="/">Home</a>
+                {% endif %}
+            </li>
+              {% if not request.user.is_superuser %}
+              <li class="nav-item">
+                <a class="nav-link active text-white" href="{% url 'chat' user.id %}">ClaimConnect</a>
               </li>
+              {% endif %}
               {% if user.is_authenticated %}
                 <li class="nav-item">
                   <a class="nav-link text-white" href="/logout/">Logout</a>

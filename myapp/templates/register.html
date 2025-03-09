@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,9 +9,12 @@
     <style>
         body {
             background: linear-gradient(to right, #6a11cb, #2575fc);
+            background: url("{% static 'assets/image/one.jpg' %}");
+            background-size: cover;
+            background-position: center;
             height: 100vh;
             display: flex;
-            justify-content: center;
+            margin-left: 200px;
             align-items: center;
         }
         .register-container {
@@ -36,26 +40,116 @@
         .reg-a{
           text-decoration: none;
         }
+
+
+        
+        body {
+            background: url("{% static 'assets/image/one.jpg' %}") no-repeat center center/cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 32px 24px;
+            font-size: 14px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-sizing: border-box;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-container h2 {
+            text-align: center;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #bbb;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #40c9ff;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .form-submit-btn {
+            width: 50%;
+            background: linear-gradient(135deg, #e81cff, #40c9ff);
+            border: none;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease-in-out;
+            align-self: center;
+            margin-top: 10px;
+        }
+
+        .form-submit-btn:hover {
+            background: linear-gradient(135deg, #40c9ff, #e81cff);
+        }
+
+        .register-link {
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .register-link a {
+            color: #40c9ff;
+            text-decoration: none;
+        }
+        
     </style>
 </head>
 <body>
 
-    <div class="register-container">
+    <div class="form-container">
         <h2>Register</h2>
         <form method="post">
             {% csrf_token %}
             {% for field in form %}
-                <div class="mb-3">
-                    <label class="form-label">{{ field.label }}</label>
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
                     {{ field }}
                     {% if field.errors %}
-                        <div class="text-danger">{{ field.errors.0 }}</div>
+                        <div class="text-danger" style="font-size: 12px;">{{ field.errors.0 }}</div>
                     {% endif %}
                 </div>
             {% endfor %}
-            <button type="submit" class="btn btn-primary">Register</button>
+            <button type="submit" class="form-submit-btn">Register</button>
         </form>
-        <p>Already have an account? <a class="reg-a" href="{% url 'login' %}">Login here</a></p>
+        <p class="register-link">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
     </div>
 
 </body>

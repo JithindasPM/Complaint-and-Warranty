@@ -1,18 +1,19 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from myapp.models import User
+from myapp.models import ChatMessage
 
 
 class RegisterForm(UserCreationForm):
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter your email'}))
-    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Choose a username'}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control','style':'color: white;'}))
+    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control','style':'color: white;'}))
     password1 = forms.CharField(
         label="Password",
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter a password'})
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'style':'color: white;'})
     )
     password2 = forms.CharField(
         label="Confirm Password",
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm your password'})
+        widget=forms.PasswordInput(attrs={'class': 'form-control','style':'color: white;'})
     )
 
     class Meta:
@@ -56,3 +57,31 @@ class WarrantyClaimForm(forms.ModelForm):
 #             'purchase_receipt': forms.ClearableFileInput(attrs={'class': 'form-control'}),
 #             'product_image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
 #         }
+
+# class ChatForm(forms.ModelForm):
+#     class Meta:
+#         model = ChatMessage
+#         fields = ['message']
+#         widgets = {
+#             'message': forms.Textarea(attrs={
+#                 'class': 'form-control',
+#                 'placeholder': 'Type your message...',
+#                 'rows': 2
+#             }),
+#         }
+        
+class ChatForm(forms.ModelForm):
+    class Meta:
+        model = ChatMessage
+        fields = ['message']
+        widgets = {
+            'message': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Type your message...',
+                'rows': 1,
+                'autocomplete': 'off',
+                'id': 'message-input',
+                'data-emojiable': 'true',
+                'style': 'overflow: hidden;'
+            }),
+        }

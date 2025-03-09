@@ -5,6 +5,8 @@ from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.db.models import Count
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 
@@ -152,31 +154,95 @@ class Warranty_View(View):
             'status_summary': status_summary
         })
 
+
+from django.db.models import Count, Max
+from django.shortcuts import render
+from django.contrib.auth import get_user_model
+from .models import ChatMessage
+
+User = get_user_model()
+
 class ShopOwnerDashboardView(View):
     def get(self, request):
-        return render(request, 'shop_owner_dashboard.html')
+        # Fetch users sorted by the latest chat time
+        users = User.objects.filter(is_superuser=False).annotate(
+            last_chat_time=Max('sent_warranty_messages__timestamp')
+        ).order_by('-last_chat_time')
+
+        # Calculate totals
+        total_users = User.objects.filter(is_superuser=False).count()
+        total_complaints = Complaint.objects.count()
+        total_warranties = WarrantyClaim.objects.count()
+
+        context = {
+            'users': users,
+            'total_users': total_users,
+            'total_complaints': total_complaints,
+            'total_warranties': total_warranties,
+        }
+        
+        return render(request, 'shop_owner_dashboard.html', context)
+
+
 
 class UpdateComplaintStatusView(View):
     def post(self, request, pk):
         complaint = get_object_or_404(Complaint, pk=pk)
+        mail = complaint.user.email
+        new_status = request.POST.get('status')
 
-        status = request.POST.get('status')
-        if status in dict(Complaint.status_choices):  # Ensure valid status
-            complaint.status = status
+        if new_status and new_status != complaint.status and new_status in dict(Complaint.status_choices):
+            # Update the status
+            complaint.status = new_status
             complaint.save()
+            messages.success(request, f"Complaint status updated to {new_status}.")
+            
+            # Email subject and message based on status
+            subject = 'ElectroClaim - Complaint Status Update'
+            status_messages = {
+                'submitted': "Your complaint has been submitted successfully. Our team will review it soon.",
+                'in_progress': "Your complaint is currently being processed. We will update you once it's resolved.",
+                'resolved': "Great news! Your complaint has been resolved.",
+                'rejected': "Unfortunately, your complaint has been rejected. Please contact support if you need further assistance."
+            }
+            message = f"Dear {complaint.user},\n\n{status_messages.get(new_status, 'Your complaint status has been updated.')}\n\nBest regards,\nElectroClaim Team"
+
+            email_from = settings.EMAIL_HOST_USER
+            recipient_list = [mail]
+            send_mail(subject, message, email_from, recipient_list)
+
         return redirect('complaints')
+
 
 
 class UpdateWarrantyClaimStatusView(View):
     def post(self, request, pk):
         warranty_claim = get_object_or_404(WarrantyClaim, pk=pk)
-        status = request.POST.get('status')
-        if status:
-            warranty_claim.claim_status = status
-            warranty_claim.save()
-            messages.success(request, f"Warranty claim status updated to {status}.")
-        return redirect('warranty')
+        mail = warranty_claim.user.email
+        new_status = request.POST.get('status')
 
+        if new_status and new_status != warranty_claim.claim_status:
+            # Update the status
+            warranty_claim.claim_status = new_status
+            warranty_claim.save()
+            messages.success(request, f"Warranty claim status updated to {new_status}.")
+            
+            # Email subject and message based on status
+            subject = 'ElectroClaim - Warranty Claim Update'
+            status_messages = {
+                'submitted': "Your warranty claim has been submitted successfully. We will review it soon.",
+                'under_review': "Your warranty claim is now under review. We will update you once the process is complete.",
+                'approved': "Congratulations! Your warranty claim has been approved.",
+                'denied': "We regret to inform you that your warranty claim has been denied."
+            }
+            message = f"Dear {warranty_claim.user},\n\n{status_messages.get(new_status, 'Your claim status has been updated.')}\n\nBest regards,\nElectroClaim Team"
+
+            email_from = settings.EMAIL_HOST_USER
+            recipient_list = [mail]
+            send_mail(subject, message, email_from, recipient_list)
+
+        return redirect('warranty')
+            
 
 class ShopOwnerClaimDeleteView(View):
     def post(self, request, claim_type, claim_id):
@@ -196,3 +262,63 @@ class ShopOwnerClaimDeleteView(View):
         claim.delete()
         messages.success(request, f"{claim_type.capitalize()} deleted successfully.")
         return redirect("shop_owner_dashboard")
+    
+
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import ChatMessage
+from .forms import ChatForm
+
+User = get_user_model()
+
+class ChatView(LoginRequiredMixin, View):
+    def get(self, request, user_id=None):
+        if request.user.is_superuser:
+            if not user_id:
+                return redirect('admin-dashboard')  # Redirect to admin dashboard if no user_id
+            chat_user = get_object_or_404(User, id=user_id)
+        else:
+            chat_user = User.objects.filter(is_superuser=True).first()
+            if not chat_user:
+                return render(request, 'chat.html', {'error': "No admin found."})
+
+        chats = ChatMessage.objects.filter(
+            sender=request.user, receiver=chat_user
+        ) | ChatMessage.objects.filter(
+            sender=chat_user, receiver=request.user
+        ).order_by("timestamp")
+
+        return render(request, 'chat.html', {'chats': chats, 'chat_user': chat_user, 'form': ChatForm()})
+
+    def post(self, request, user_id=None):
+        if request.user.is_superuser:
+            if not user_id:
+                return redirect('admin-dashboard')  # Redirect if no user_id is provided
+            chat_user = get_object_or_404(User, id=user_id)
+        else:
+            chat_user = User.objects.filter(is_superuser=True).first()
+            if not chat_user:
+                return render(request, 'chat.html', {'error': "No admin found."})
+
+        form = ChatForm(request.POST)
+        if form.is_valid():
+            chat = form.save(commit=False)
+            chat.sender = request.user
+            chat.receiver = chat_user
+            chat.save()
+            return redirect('chat', user_id=chat_user.id)  # Fixed redirection
+
+        chats = ChatMessage.objects.filter(
+            sender=request.user, receiver=chat_user
+        ) | ChatMessage.objects.filter(
+            sender=chat_user, receiver=request.user
+        ).order_by("timestamp")
+
+        return render(request, 'chat.html', {'chats': chats, 'chat_user': chat_user, 'form': form})
+
+
+
+
+
+

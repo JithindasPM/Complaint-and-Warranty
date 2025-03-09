@@ -34,6 +34,7 @@ from myapp.views import Complaint_View
 from myapp.views import Warranty_View
 from myapp.views import DeleteComplaintView
 from myapp.views import DeleteWarrantyClaimView
+from myapp.views import ChatView
 
 
 urlpatterns = [
@@ -53,6 +54,8 @@ urlpatterns = [
     path('warranty', Warranty_View.as_view(), name='warranty'),
     path('delete_complaint/<int:pk>/', DeleteComplaintView.as_view(), name='delete_complaint'),
     path('warranty/delete/<int:pk>/', DeleteWarrantyClaimView.as_view(), name='delete_warranty_claim'),
+    path('chat/<int:user_id>/', ChatView.as_view(), name='chat'),
+
 
 ]
 if settings.DEBUG:
