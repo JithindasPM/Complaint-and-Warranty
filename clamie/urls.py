@@ -35,6 +35,8 @@ from myapp.views import Warranty_View
 from myapp.views import DeleteComplaintView
 from myapp.views import DeleteWarrantyClaimView
 from myapp.views import ChatView
+from myapp.views import Complaint_Delete_View
+from myapp.views import Warrenty_Delete_View
 
 
 urlpatterns = [
@@ -55,6 +57,8 @@ urlpatterns = [
     path('delete_complaint/<int:pk>/', DeleteComplaintView.as_view(), name='delete_complaint'),
     path('warranty/delete/<int:pk>/', DeleteWarrantyClaimView.as_view(), name='delete_warranty_claim'),
     path('chat/<int:user_id>/', ChatView.as_view(), name='chat'),
+    path('comp_del/<int:pk>/', Complaint_Delete_View.as_view(), name='comp_del'),
+    path('war_del/<int:pk>/', Warrenty_Delete_View.as_view(), name='war_del'),
 
 
 ]

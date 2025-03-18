@@ -130,7 +130,7 @@ class CustomerDashboardView(View):
 
 class Complaint_View(View):
     def get(self, request):
-        complaints = Complaint.objects.all()
+        complaints = Complaint.objects.all().order_by('-id')
         total_complaints = complaints.count()
         status_counts = complaints.values('status').annotate(count=Count('status'))
         status_summary = {item['status']: item['count'] for item in status_counts}
@@ -143,7 +143,7 @@ class Complaint_View(View):
     
 class Warranty_View(View):
     def get(self, request):
-        warranty_claims = WarrantyClaim.objects.all()
+        warranty_claims = WarrantyClaim.objects.all().order_by('-id')
         total_claims = warranty_claims.count()
         status_counts = warranty_claims.values('claim_status').annotate(count=Count('claim_status'))
         status_summary = {item['claim_status']: item['count'] for item in status_counts}
@@ -318,7 +318,15 @@ class ChatView(LoginRequiredMixin, View):
         return render(request, 'chat.html', {'chats': chats, 'chat_user': chat_user, 'form': form})
 
 
+class Complaint_Delete_View(View):
+    def get(self,request,*args,**kwargs):
+        id=kwargs.get('pk')
+        Complaint.objects.get(id=id).delete()
+        return redirect('complaints')
 
 
-
-
+class Warrenty_Delete_View(View):
+    def get(self,request,*args,**kwargs):
+        id=kwargs.get('pk')
+        WarrantyClaim.objects.get(id=id).delete()
+        return redirect('warranty')
