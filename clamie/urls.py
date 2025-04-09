@@ -36,7 +36,7 @@ from myapp.views import DeleteComplaintView
 from myapp.views import DeleteWarrantyClaimView
 from myapp.views import ChatView
 from myapp.views import Complaint_Delete_View
-from myapp.views import Warrenty_Delete_View
+from myapp.views import Warrenty_Delete_View,Groq_View
 
 
 urlpatterns = [
@@ -59,7 +59,7 @@ urlpatterns = [
     path('chat/<int:user_id>/', ChatView.as_view(), name='chat'),
     path('comp_del/<int:pk>/', Complaint_Delete_View.as_view(), name='comp_del'),
     path('war_del/<int:pk>/', Warrenty_Delete_View.as_view(), name='war_del'),
-
+    path("chatbot/", Groq_View.as_view(), name="chatbot"),
 
 ]
 if settings.DEBUG:
